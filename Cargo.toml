@@ -1,0 +1,16 @@
+[package]
+name = "hft-term"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.49", features = ["full"] }
+crossterm = "0.26"
+ratatui = "0.30.0"
+unicode-segmentation = "1.12.0"
+unicode-width = "0.2.2"
+
+
+[lib]
+name = "hft_term"
+path = "src/lib.rs"
