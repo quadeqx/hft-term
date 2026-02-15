@@ -84,7 +84,7 @@ impl TerminalCLI {
                 if let Some(out) = &self.pane.output {
                     for line in out.lines() {
                         let line_width = UnicodeWidthStr::width(line) as u16;
-                        let wraps = (line_width / usable_width) as u16;
+                        let wraps = line_width / usable_width;
                         cursor_row += 1 + wraps;
                     }
                 }
