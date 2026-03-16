@@ -1,9 +1,21 @@
 //! src/commands.rs
-use crate::structs::{Command, Pane};
+use crate::{
+    Runnable,
+    structs::{Command, Pane},
+};
 use std::collections::HashMap;
 
+// Trait implemented for genericity
+//pub trait Runnable {
+//    fn run(&self, args: &[&str]) -> Option<String>;
+//    fn help(&self) -> &str;
+//    fn subcommands(&self) -> &HashMap<&'static str, Self>
+//    where
+//        Self: Sized;
+//}
+
 // Dispatch the commands
-pub fn dispatch(input: &str, commands: &HashMap<&'static str, Command>, pane: &mut Pane) {
+pub fn dispatch(input: &str, commands: &HashMap<&'static str, Box<dyn Runnable>>, pane: &mut Pane) {
     let parts: Vec<&str> = input.split_whitespace().collect();
 
     if parts.is_empty() {
@@ -13,24 +25,23 @@ pub fn dispatch(input: &str, commands: &HashMap<&'static str, Command>, pane: &m
     dispatch_recursive(&parts, commands, pane);
 }
 
-fn dispatch_recursive(parts: &[&str], commands: &HashMap<&'static str, Command>, pane: &mut Pane) {
-    let name = parts[0];
+fn dispatch_recursive(
+    args: &[&str],
+    commands: &HashMap<&'static str, Box<dyn Runnable>>,
+    pane: &mut Pane,
+) {
+    let name = args[0];
 
     match commands.get(name) {
         Some(cmd) => {
-            let remaining = &parts[1..];
+            let remaining = &args[1..];
 
-            // If next token matches a subcommand, recurse
-            if let Some(next) = remaining.first()
-                && cmd.subcommands.contains_key(next)
-            {
-                dispatch_recursive(remaining, &cmd.subcommands, pane);
-                return;
-            }
+            // If next token matches a subcommand, recurse...
+            // To be done
 
             // Execute command if runnable
-            if let Some(run) = cmd.run {
-                run(remaining, commands, pane);
+            if let Some(output) = cmd.run(remaining) {
+                pane.output = Some(output);
             } else {
                 pane.output = Some(format!("Incomplete command: {}\n", name));
             }

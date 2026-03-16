@@ -5,23 +5,23 @@ pub mod structs;
 
 use commands::dispatch;
 use std::io;
-pub use structs::Pane;
+pub use structs::{Command, Pane, Runnable};
 use unicode_segmentation::UnicodeSegmentation;
 
 pub struct TerminalCLI {
-    pub commands: std::collections::HashMap<&'static str, structs::Command>,
+    pub commands: std::collections::HashMap<&'static str, Box<dyn Runnable>>,
     pub pane: Pane,
 }
 
+// =================================================================
+// This is to allow passing of commands from
+// other crates.
+
 impl TerminalCLI {
-    pub fn new(commands: std::collections::HashMap<&'static str, structs::Command>) -> Self {
+    pub fn new(commands: std::collections::HashMap<&'static str, Box<dyn Runnable>>) -> Self {
         Self {
             commands,
-            pane: Pane {
-                buffer: String::new(),
-                cursor_grapheme: 0,
-                output: None,
-            },
+            pane: Pane::default(),
         }
     }
 
@@ -128,6 +128,10 @@ impl TerminalCLI {
                         let cmd = self.pane.buffer.trim().to_string();
                         if !cmd.is_empty() {
                             dispatch(&cmd, &self.commands, &mut self.pane);
+                            // Think of capturing
+                            // the output here and
+                            // passing it to
+                            // pane.output
                             self.pane.buffer.clear();
                         }
                     }
