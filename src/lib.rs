@@ -58,7 +58,7 @@ impl TerminalCLI {
                     .split(size);
 
                 let area = rows[0];
-                let prompt = "hft-engine> ";
+                let prompt = "┌──(main)\n└─$ ";
                 let border_style = Style::default().fg(Color::Cyan);
 
                 let mut render = String::new();
@@ -80,7 +80,7 @@ impl TerminalCLI {
                 let prompt_width = UnicodeWidthStr::width(prompt) as u16;
                 let usable_width = area.width.saturating_sub(2).saturating_sub(prompt_width);
 
-                let mut cursor_row = 0;
+                let mut cursor_row = 1;
                 if let Some(out) = &self.pane.output {
                     for line in out.lines() {
                         let line_width = UnicodeWidthStr::width(line) as u16;
@@ -95,7 +95,11 @@ impl TerminalCLI {
                     usable_width,
                 );
                 cursor_row += input_row;
-                let cursor_x = area.x + 1 + prompt_width + input_col;
+                let cursor_x = area.x + 1 + prompt_width - 10 + input_col;
+                // minus 10 is for newline
+                // prompt. The sum of the negated numbers of prompt length
+                // and number to substract should be equal to -4 so the cursor
+                // is positioned in the correct x co-ordinate
                 let cursor_y = area.y + 1 + cursor_row;
                 f.set_cursor_position((cursor_x, cursor_y));
             })?;
